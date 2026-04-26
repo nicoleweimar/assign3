@@ -52,6 +52,11 @@ export default function Board() {
     const nextSquares = squares.slice();
     nextSquares[selectedSquare] = null; // remove piece from old spot
     nextSquares[i] = player; //place in new spot
+    //here we will add logic for moing the middle piece
+    if (squares[4] === player && selectedSquare !== 4 && calculateWinner(nextSquares) !== player) {
+      setSelectedSquare(null);
+      return;
+    } //if the player has center and doesnt select it and there move doesnt win then we wont let them do it
     setSquares(nextSquares); //update board
     setSelectedSquare(null); //reset selection
     setXIsNext(!xIsNext); //next players turn

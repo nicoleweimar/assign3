@@ -142,6 +142,45 @@ class TestChorusLapilli(unittest.TestCase):
 
 
 # =========================== [ADD YOUR TESTS HERE] ===========================
+    def test_no_moves_postwin(self):
+        tiles = self.driver.find_element(By.XPATH, self.BOARD_TILE_XPATH)
+        tiles[0].click() #1st row X NULL NULL
+        tiles[3].click() #2nd row O NULL NULL
+        tiles[1].click() # X X NULL
+        tiles[4].click() # 2nd row O O NULL
+        tiles[2].click() # first row full, X will win X X X
+        #test another click wont work
+        tiles[5].click()
+        self.assertTileIs(tiles[5], self.SYMBOL_BLANK)
+
+    def test_no_nonmiddle_nonwin_moves(self):
+        tiles = self.driver.find_elements(By.XPATH, self.BOARD_TILE_XPATH)
+        tiles[0].click() 
+        tiles[1].click()  
+        tiles[2].click() 
+        tiles[3].click()
+        tiles[4].click() 
+        tiles[8].click()  
+        # 5 is empty, 5 is adjacent to 2, but this does not win.
+        # Since X has center, X must move center or win.
+        tiles[2].click()
+        tiles[5].click()
+        self.assertTileIs(tiles[2], self.SYMBOL_X) #test not moved
+        self.assertTileIs(tiles[5], self.SYMBOL_BLANK) #test not moved
+    
+    def test_nonadjacent_invalid(self):
+        tiles = self.driver.find_elements(By.XPATH, self.BOARD_TILE_XPATH)
+        tiles[0].click() 
+        tiles[1].click()  
+        tiles[2].click() 
+        tiles[3].click()
+        tiles[5].click() 
+        tiles[8].click()  
+        # test that we cant move 2 to 7 since not adjacent
+        tiles[2].click()
+        tiles[7].click()
+        self.assertTileIs(tiles[2], self.SYMBOL_X) #test not moved
+        self.assertTileIs(tiles[7], self.SYMBOL_BLANK) #test not moved
 
     def test_new_board_empty(self):
         '''Check if a new game always starts with an empty board.'''
