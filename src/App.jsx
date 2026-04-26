@@ -9,22 +9,54 @@ function Square({value, onSquareClick}) {
 }
 
 export default function Board() {
-  const [xIsNext, setXIsNext] = useState(true);
   const [squares, setSquares] = useState(Array(9).fill(null));
+  const [xIsNext, setXIsNext] = useState(true);
+  const [selectedSquare, setSelectedSquare] = useState(null);
 
   function handleClick(i) {
-    if (calculateWinner(squares) || squares[i]) {
+  const player = xIsNext ? 'X' : 'O';
+  const playerCount = countPieces(squares, player);
+  
+  if (calculateWinner(squares)) {
+  return;
+  }
+
+  if (playerCount < 3) {
+    if (squares[i]) {
+      return;
+    }
+
+    const nextSquares = squares.slice();
+    nextSquares[i] = player;
+
+    setSquares(nextSquares);
+    setXIsNext(!xIsNext);
+    return;
+  }
+  if (selectedSquare === null) { //if we have not selected a square (first click)
+    if (squares[i] !== player) { //return if the square selected is not current players square
+      return;
+    }
+    setSelectedSquare(i); //otherwise we will set the selectedsquare
+    return;
+  }
+  else { //second click we have selected a square
+    if (squares[i] !== null) { //if destination is not empty reset to first click
+      setSelectedSquare(null);
+      return; 
+    }
+    if (!isAdjacent(selectedSquare, i)) {
+      setSelectedSquare(null);
       return;
     }
     const nextSquares = squares.slice();
-    if (xIsNext) {
-      nextSquares[i] = 'X';
-    } else {
-      nextSquares[i] = 'O';
-    }
-    setSquares(nextSquares);
-    setXIsNext(!xIsNext);
+    nextSquares[selectedSquare] = null; // remove piece from old spot
+    nextSquares[i] = player; //place in new spot
+    setSquares(nextSquares); //update board
+    setSelectedSquare(null); //reset selection
+    setXIsNext(!xIsNext); //next players turn
   }
+}
 
   const winner = calculateWinner(squares);
   let status;
@@ -54,6 +86,29 @@ export default function Board() {
       </div>
     </>
   );
+}
+
+function countPieces(squares, player) {
+  let count = 0;
+  for (let i = 0; i < squares.length; i++) {
+    if (squares[i] === player) {
+      count++;
+    }
+  }
+  return count;
+}
+
+function isAdjacent(a, b) {
+  const rowA = Math.floor(a / 3);
+  const colA = a % 3;
+
+  const rowB = Math.floor(b / 3);
+  const colB = b % 3;
+
+  const rowDiff = Math.abs(rowA - rowB);
+  const colDiff = Math.abs(colA - colB);
+
+  return rowDiff <= 1 && colDiff <= 1 && !(rowDiff === 0 && colDiff === 0);
 }
 
 function calculateWinner(squares) {
